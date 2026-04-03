@@ -18,13 +18,13 @@ class ForecastService:
         self.prompt_service = prompt_service
         self.ai_service = ai_service
 
-    def create_forecast(self, action_id: int, request: ForecastRequest) -> ForecastResponse:
+    async def create_forecast(self, action_id: int, request: ForecastRequest) -> ForecastResponse:
         action = self.recommendation_repository.get_action(action_id)
         if action is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Action not found")
 
         self.prompt_service.build_forecast_prompt(action.title, request.notes)
-        payload, raw_response = self.ai_service.generate_forecast(
+        payload, raw_response = await self.ai_service.generate_forecast(
             action=action,
             segment=action.recommendation.segment,
             notes=request.notes,

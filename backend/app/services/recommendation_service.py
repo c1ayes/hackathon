@@ -22,7 +22,7 @@ class RecommendationService:
         self.prompt_service = prompt_service
         self.ai_service = ai_service
 
-    def create_recommendation(
+    async def create_recommendation(
         self, segment_id: int, request: RecommendationRequest
     ) -> RecommendationResponse:
         segment = self.segment_repository.get_segment(segment_id)
@@ -30,7 +30,11 @@ class RecommendationService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Segment not found")
 
         prompt = self.prompt_service.build_recommendation_prompt(segment, request.scenario, request.language)
-        ai_payload, raw_response = self.ai_service.generate_recommendations(segment, request.scenario)
+        ai_payload, raw_response = await self.ai_service.generate_recommendations(
+            segment=segment,
+            scenario=request.scenario,
+            language=request.language,
+        )
 
         recommendation = Recommendation(
             segment_id=segment.id,

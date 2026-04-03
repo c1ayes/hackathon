@@ -16,7 +16,7 @@ router = APIRouter(tags=["recommendations"])
 
 
 @router.post("/segments/{segment_id}/recommendations", response_model=RecommendationResponse)
-def create_recommendation(
+async def create_recommendation(
     segment_id: int,
     request: RecommendationRequest,
     db: Session = Depends(get_db),
@@ -27,11 +27,11 @@ def create_recommendation(
         prompt_service=PromptService(),
         ai_service=AIService(),
     )
-    return service.create_recommendation(segment_id, request)
+    return await service.create_recommendation(segment_id, request)
 
 
 @router.post("/recommendations/{action_id}/forecast", response_model=ForecastResponse)
-def create_forecast(
+async def create_forecast(
     action_id: int,
     request: ForecastRequest,
     db: Session = Depends(get_db),
@@ -41,4 +41,4 @@ def create_forecast(
         prompt_service=PromptService(),
         ai_service=AIService(),
     )
-    return service.create_forecast(action_id, request)
+    return await service.create_forecast(action_id, request)

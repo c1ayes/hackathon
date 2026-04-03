@@ -70,6 +70,8 @@ def build_brain2_prompt(
     
     prompt = f"""You are an AI analyst for the Almaty Smart City Decision Dashboard.
 City officials use your output to allocate budget and dispatch maintenance teams.
+Return all user-facing text in Russian.
+Use only tenge for money amounts and never use dollars or USD.
 
 {ALMATY_CONTEXT}
 
@@ -136,7 +138,7 @@ Count your Type B flags and apply the penalty.
 
 ---
 
-RESPOND WITH ONLY THIS JSON STRUCTURE (no markdown, no explanation outside JSON):
+RESPOND WITH ONLY THIS JSON STRUCTURE (no markdown, no explanation outside JSON, all strings in Russian):
 
 {{
   "enrichment": {{
@@ -215,6 +217,8 @@ def build_roads_only_prompt(brain1_roads: dict, top_n: int = 3) -> str:
     aggregates = brain1_roads.get("aggregates", {})
     
     prompt = f"""You are analyzing road maintenance priorities for Almaty, Kazakhstan.
+Return all user-facing text in Russian.
+Use only tenge for money amounts and never use dollars or USD.
 
 {ALMATY_CONTEXT}
 
@@ -257,6 +261,8 @@ def build_cameras_only_prompt(brain1_cameras: dict, top_n: int = 2) -> str:
     aggregates = brain1_cameras.get("aggregates", {})
     
     prompt = f"""You are analyzing traffic camera coverage gaps for Almaty, Kazakhstan.
+Return all user-facing text in Russian.
+Use only tenge for money amounts and never use dollars or USD.
 
 {ALMATY_CONTEXT}
 
