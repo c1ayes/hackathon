@@ -29,7 +29,7 @@ function CameraRow({ camera, index }) {
       <div className="text-right shrink-0">
         <div className="text-xs font-medium text-gray-900">×{camera.roi.toFixed(1)}</div>
         <div className="text-xs text-gray-400">
-          {Math.round(camera.revenue / 1_000_000)}M ₸/г
+          {Math.round(camera.revenue / 1_000_000)}млн ₸/г
         </div>
       </div>
     </div>

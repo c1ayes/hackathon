@@ -1,6 +1,6 @@
 const navItems = [
-    {label: "Главная", active: true},
-    {label: "Проишествия", active: false},
+  { label: "Главная", active: true },
+  { label: "Проишествия", active: false },
 ];
 
 export default function Sidebar() {
@@ -10,7 +10,7 @@ export default function Sidebar() {
         <div className="text-xs font-medium text-gray-900 leading-tight">
           Smart City<br />Dashboard
         </div>
-        <div className="text-xs text-gray-400 mt-1">Алматы, 2026</div>
+        <div className="text-xs text-gray-400 mt-1">Алматы, 2025</div>
       </div>
 
       <nav className="flex flex-col gap-0.5 py-2">

@@ -1,6 +1,8 @@
 import { useEffect } from "react";
+
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+
 import { heatmapPoints } from "../data/mockData";
 
 function HeatLayer() {

@@ -1,7 +1,7 @@
 import { formatTenge } from "../data/mockData";
 
-// структура которая придет с бэкэнда
-// { what: string, critical: string, action: string, savings: number }
+
+// { what: str, critical: str, action: str, savings: int }
 
 export default function InsightCard({ insight, loading }) {
   if (loading) {
@@ -16,7 +16,7 @@ export default function InsightCard({ insight, loading }) {
   if (!insight) {
     return (
       <div className="bg-white border-t border-gray-200 px-5 py-4 text-center text-sm text-gray-400">
-        Нажмите «Анализировать», чтобы ИИ выдал приоритеты и оценку экономии
+        Нажмите «Анализировать» — ИИ выдаст приоритеты и оценку экономии
       </div>
     );
   }
@@ -25,7 +25,6 @@ export default function InsightCard({ insight, loading }) {
     <div className="bg-white border-t border-gray-200 px-5 py-4">
       <div className="grid grid-cols-3 gap-3">
 
-        {/* чо происходит */}
         <div className="bg-gray-50 rounded-lg px-3 py-2.5">
           <div className="text-xs text-gray-400 uppercase tracking-wider mb-1" style={{ fontSize: 9 }}>
             Что происходит
@@ -33,7 +32,6 @@ export default function InsightCard({ insight, loading }) {
           <div className="text-xs text-gray-900 leading-relaxed">{insight.what}</div>
         </div>
 
-        {/* критично */}
         <div className="bg-red-50 rounded-lg px-3 py-2.5">
           <div className="text-xs text-red-400 uppercase tracking-wider mb-1" style={{ fontSize: 9 }}>
             Критично
@@ -41,7 +39,7 @@ export default function InsightCard({ insight, loading }) {
           <div className="text-xs text-red-800 leading-relaxed">{insight.critical}</div>
         </div>
 
-        {/* действия + тг */}
+        {/* действие + тг */}
         <div className="bg-blue-50 rounded-lg px-3 py-2.5">
           <div className="text-xs text-blue-400 uppercase tracking-wider mb-1" style={{ fontSize: 9 }}>
             Рекомендацич
