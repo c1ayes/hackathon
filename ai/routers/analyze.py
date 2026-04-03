@@ -109,6 +109,8 @@ def analyze_district(data: DistrictAnalyzeRequest) -> DistrictAnalyzeResponse:
     ) or "No recent reports."
 
     prompt = f"""Analyze district "{data.name}" in Almaty, Kazakhstan for the city dashboard.
+Write all text fields in Russian.
+Use only tenge for money amounts and never use dollars or USD.
 
 Current metrics (scale 0-1 unless noted):
 - risk_score: {data.risk_score} (>0.7 = critical, >0.45 = warning)
@@ -158,6 +160,8 @@ Return this exact JSON (all fields required):
 def simulate_action(data: SimulateRequest) -> SimulateResponse:
     prompt = f"""Simulate this city intervention in Almaty district "{data.district_name}":
 Action: "{data.action}"
+Write all text fields in Russian.
+Use only tenge for money amounts and never use dollars or USD.
 
 Current metrics:
 - risk_score: {data.before_risk} (0-1)

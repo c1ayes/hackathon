@@ -8,6 +8,7 @@ point to the test database instead of the production one.
 import os
 
 os.environ["DATABASE_URL"] = "sqlite:///./test_smart_city.db"
+os.environ["AI_PROVIDER"] = "mock"
 
 import pytest
 from fastapi.testclient import TestClient

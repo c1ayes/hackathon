@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default=f"sqlite:///{Path(__file__).resolve().parents[2] / 'smart_city.db'}"
     )
-    ai_provider: str = "mock"
+    ai_provider: str = "service"
     ai_model: str = "budget-optimizer-v1"
     prompt_version: str = "v1"
 
