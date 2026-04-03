@@ -1,74 +1,118 @@
+// At lat 43.25°N: 1° lat ≈ 111 000 m, 1° lng ≈ 81 000 m (cos 43° ≈ 0.731)
+// 100 m ≈ 0.000900° lat, 0.001235° lng
+function buildSegments(roadBase, waypoints, scoreOffsets) {
+  const SEG_M = 100;
+  const M_PER_LAT = 111_000;
+  const M_PER_LNG = 81_000;
+  const segments = [];
+  let globalIdx = 0;
+
+  for (let w = 0; w < waypoints.length - 1; w++) {
+    const [la1, ln1] = waypoints[w];
+    const [la2, ln2] = waypoints[w + 1];
+    const dLat = (la2 - la1) * M_PER_LAT;
+    const dLng = (ln2 - ln1) * M_PER_LNG;
+    const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+    const n = Math.max(1, Math.round(dist / SEG_M));
+
+    for (let s = 0; s < n; s++) {
+      const t1 = s / n;
+      const t2 = (s + 1) / n;
+      const slat1 = la1 + (la2 - la1) * t1;
+      const slng1 = ln1 + (ln2 - ln1) * t1;
+      const slat2 = la1 + (la2 - la1) * t2;
+      const slng2 = ln1 + (ln2 - ln1) * t2;
+      const offset = scoreOffsets[globalIdx % scoreOffsets.length];
+      segments.push({
+        ...roadBase,
+        id: roadBase.id * 1000 + globalIdx,
+        score: Math.max(0, Math.min(100, roadBase.score + offset)),
+        lat: (slat1 + slat2) / 2,
+        lng: (slng1 + slng2) / 2,
+        coords: [[slat1, slng1], [slat2, slng2]],
+      });
+      globalIdx++;
+    }
+  }
+  return segments;
+}
+
+// ── Road 1: ул. Толе би (центр) — Кунаева → Достык, E-W at lat ~43.258 ──
+const toleBiSegs = buildSegments(
+  { id: 1, name: "ул. Толе би (центр)", score: 92, traffic: "высокий",
+    fixCost: 45_000_000, emergencyCost: 180_000_000, savings: 135_000_000,
+    incidentCount: 14, segment: "Кунаева — Достык" },
+  [
+    [43.2582, 76.9155], // Кунаева
+    [43.2578, 76.9220], // Панфилова
+    [43.2575, 76.9285], // Фурманов
+    [43.2572, 76.9355], // Желтоксан
+    [43.2569, 76.9415], // Достык
+  ],
+  [0, 5, -3, 8, -5, 3, 7, -4, 2, 6, -2, 9, -6, 4, -1, 3, -4, 7, 2, -3]
+);
+
+// ── Road 2: пр. Аль-Фараби (запад) — Есентай → Ремизовка, curved arc ──
+const alFarabiSegs = buildSegments(
+  { id: 2, name: "пр. Аль-Фараби (запад)", score: 78, traffic: "высокий",
+    fixCost: 28_000_000, emergencyCost: 95_000_000, savings: 67_000_000,
+    incidentCount: 8, segment: "Есентай — Ремизовка" },
+  [
+    [43.2165, 76.9130], // Есентай mall area
+    [43.2195, 76.9250], // Ходжи Мукана
+    [43.2230, 76.9390], // Достык
+    [43.2265, 76.9530], // Омарова
+    [43.2295, 76.9660], // Ремизовка
+  ],
+  [0, -4, 6, -2, 8, -5, 3, 7, -3, 5, -6, 4, 2, -3, 9, -1, 4, -5, 6, -2]
+);
+
+// ── Road 3: ул. Саина (юг) — Тимирязев → Момышулы, N-S at lng ~76.890 ──
+const sainaSegs = buildSegments(
+  { id: 3, name: "ул. Саина (юг)", score: 61, traffic: "средний",
+    fixCost: 12_000_000, emergencyCost: 40_000_000, savings: 28_000_000,
+    incidentCount: 5, segment: "Тимирязев — Момышулы" },
+  [
+    [43.2305, 76.8905], // Тимирязев
+    [43.2390, 76.8902], // Райымбек
+    [43.2475, 76.8900], // Жибек жолы
+    [43.2570, 76.8898], // Момышулы
+  ],
+  [0, 7, -4, 10, -2, 5, -7, 3, 8, -5, 2, 6, -3, 9, -6, 4, 1, -4, 7, -1]
+);
+
+// ── Road 4: пр. Райымбек — Саина → Момышулы, E-W at lat ~43.244 ──
+const rayimbekSegs = buildSegments(
+  { id: 4, name: "пр. Райымбек", score: 45, traffic: "средний",
+    fixCost: 8_000_000, emergencyCost: 22_000_000, savings: 14_000_000,
+    incidentCount: 3, segment: "Саина — Момышулы" },
+  [
+    [43.2440, 76.8905], // Саина
+    [43.2443, 76.8980], // промежуток
+    [43.2447, 76.9060], // Момышулы
+  ],
+  [0, 6, -5, 3, 10, -3, 7, -6, 4, 2, -4, 8, -1, 5, -7]
+);
+
+// ── Road 5: ул. Момышулы (север) — Северное кольцо, N-S at lng ~76.906 ──
+const momyshulySegs = buildSegments(
+  { id: 5, name: "ул. Момышулы (север)", score: 29, traffic: "низкий",
+    fixCost: 5_000_000, emergencyCost: 11_000_000, savings: 6_000_000,
+    incidentCount: 2, segment: "Северное кольцо" },
+  [
+    [43.2660, 76.9065], // south
+    [43.2750, 76.9063], // mid
+    [43.2850, 76.9060], // north
+  ],
+  [0, -4, 6, -2, 5, -6, 3, 7, -3, 4, -5, 2, 8, -1, 3]
+);
+
 export const roadsData = [
-  {
-    id: 1,
-    name: "ул. Толе би (центр)",
-    score: 92,
-    traffic: "высокий",
-    fixCost: 45_000_000,
-    emergencyCost: 180_000_000,
-    savings: 135_000_000,
-    lat: 43.2565,
-    lng: 76.9286,
-    coords: [[43.2565, 76.9286], [43.2567, 76.9400]],
-    incidentCount: 14,
-    segment: "Достык — Кунаева",
-  },
-  {
-    id: 2,
-    name: "пр. Аль-Фараби (запад)",
-    score: 78,
-    traffic: "высокий",
-    fixCost: 28_000_000,
-    emergencyCost: 95_000_000,
-    savings: 67_000_000,
-    lat: 43.2510,
-    lng: 76.8900,
-    coords: [[43.2110, 76.9200], [43.2150, 76.9400]],
-    incidentCount: 8,
-    segment: "Есентай — Ремизовка",
-  },
-  {
-    id: 3,
-    name: "ул. Саина (юг)",
-    score: 61,
-    traffic: "средний",
-    fixCost: 12_000_000,
-    emergencyCost: 40_000_000,
-    savings: 28_000_000,
-    lat: 43.2380,
-    lng: 76.8890,
-    coords: [[43.2380, 76.8890], [43.2400, 76.9000]],
-    incidentCount: 5,
-    segment: "Тимирязев — Момышулы",
-  },
-  {
-    id: 4,
-    name: "пр. Райымбек",
-    score: 45,
-    traffic: "средний",
-    fixCost: 8_000_000,
-    emergencyCost: 22_000_000,
-    savings: 14_000_000,
-    lat: 43.2430,
-    lng: 76.9050,
-    coords: [[43.2430, 76.9050], [43.2450, 76.9200]],
-    incidentCount: 3,
-    segment: "Саина — Момышулы",
-  },
-  {
-    id: 5,
-    name: "ул. Момышулы (север)",
-    score: 29,
-    traffic: "низкий",
-    fixCost: 5_000_000,
-    emergencyCost: 11_000_000,
-    savings: 6_000_000,
-    lat: 43.2700,
-    lng: 76.9400,
-    coords: [[43.2700, 76.9400], [43.2720, 76.9500]],
-    incidentCount: 2,
-    segment: "Северное кольцо",
-  },
+  ...toleBiSegs,
+  ...alFarabiSegs,
+  ...sainaSegs,
+  ...rayimbekSegs,
+  ...momyshulySegs,
 ];
 
 export const camerasData = [

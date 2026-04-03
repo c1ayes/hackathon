@@ -1,10 +1,12 @@
 import { Polyline, Tooltip } from "react-leaflet";
 import { roadsData } from "../data/mockData";
 
-function roadColor(incidentCount) {
-  if (incidentCount >= 10) return "#E24B4A";
-  if (incidentCount >= 5) return "#EF9F27";
-  return "#639922";
+// Score 0–100: green → orange → red
+function roadColor(score) {
+  const s = Math.max(0, Math.min(100, score));
+  if (s >= 70) return "#E53935";
+  if (s >= 40) return "#FF9800";
+  return "#4CAF50";
 }
 
 export default function RoadsLayer({ highlightRoadId, onSelectRoad }) {
@@ -12,7 +14,7 @@ export default function RoadsLayer({ highlightRoadId, onSelectRoad }) {
     <>
       {roadsData.map((road) => {
         const isHighlighted = road.id === highlightRoadId;
-        const color = roadColor(road.incidentCount);
+        const color = roadColor(road.score);
         return (
           <Polyline
             key={road.id}
@@ -47,7 +49,7 @@ export default function RoadsLayer({ highlightRoadId, onSelectRoad }) {
                   {road.name}
                 </div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>
-                  {road.incidentCount} происшествий
+                  Балл: {road.score}
                 </div>
                 <div style={{ fontSize: 10, color: "#aaa", marginTop: 2 }}>
                   {road.segment}
