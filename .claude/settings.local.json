@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:/Users/bedzo/Downloads/roads.json\" \"C:/Users/bedzo/hackathon/ai/data/roads.json\")",
+      "Bash(cp \"C:/Users/bedzo/Downloads/cameras.json\" \"C:/Users/bedzo/hackathon/ai/data/cameras.json\")",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute",
+      "Read(//c/Users/bedzo/hackathon/backend/**)",
+      "Bash(venv/Scripts/pip install:*)",
+      "Bash(venv/Scripts/python -m pytest -v)",
+      "Bash(venv/Scripts/python -m pytest -v -m \"not integration\")",
+      "Bash(venv/Scripts/python -c \"import httpx; r = httpx.post\\(''http://localhost:8001/analyze/roads'', timeout=120\\); print\\(r.status_code\\); print\\(r.text[:500]\\)\")",
+      "Bash(venv/Scripts/pip show:*)"
+    ]
+  }
+}
