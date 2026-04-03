@@ -1,5 +1,5 @@
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-sqlalchemy==2.0.30
-ollama==0.2.1
-pydantic==2.7.1
+fastapi==0.115.12
+uvicorn==0.34.0
+sqlalchemy==2.0.40
+pydantic==2.11.3
+pydantic-settings==2.8.1
