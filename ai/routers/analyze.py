@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from schemas.district import (
     DistrictAnalyzeRequest,
     DistrictAnalyzeResponse,
@@ -6,9 +6,99 @@ from schemas.district import (
     SimulateResponse,
     SimulationMetrics,
 )
-from services.ollama_service import _call_ollama, _clamp, _city_status
+from schemas.unified import UnifiedAnalysisRequest, UnifiedAnalysisResponse
+from services.ollama_service import _call_ollama, _clamp, _city_status, check_ollama_health
+from services.pipeline import (
+    run_analysis_pipeline,
+    generate_merged_recommendations,
+    generate_executive_summary,
+)
+from dependencies import load_roads_data, load_cameras_data
 
 router = APIRouter()
+
+
+@router.post("/unified")
+def analyze_unified(
+    request: UnifiedAnalysisRequest = UnifiedAnalysisRequest(),
+    roads: dict = Depends(load_roads_data),
+    cameras: dict = Depends(load_cameras_data),
+) -> dict:
+    """
+    Unified analysis endpoint — runs Brain 1 + Brain 2 pipeline.
+    
+    This is the main endpoint for the new dual-brain architecture.
+    Returns merged analysis with:
+    - Brain 1 deterministic scores (roads + cameras)
+    - Brain 2 LLM enrichment (overlaps, anomalies, context)
+    - Merged recommendations
+    - Executive summary
+    """
+    # Run the full pipeline
+    result = run_analysis_pipeline(
+        roads_data=roads,
+        cameras_data=cameras,
+        top_n=request.top_n,
+        skip_llm=False,
+    )
+    
+    # Generate merged recommendations
+    recommendations = generate_merged_recommendations(result)
+    
+    # Generate executive summary
+    summary = generate_executive_summary(result)
+    
+    # Build response
+    response = {
+        "executive_summary": summary,
+        "recommendations": recommendations,
+        "analysis_metadata": result["analysis_metadata"],
+    }
+    
+    # Include full Brain 1 output if requested
+    if request.include_full_brain1:
+        response["brain1_roads"] = result["brain1_roads"]
+        response["brain1_cameras"] = result["brain1_cameras"]
+    
+    # Include Brain 2 output
+    response["brain2"] = result["brain2"]
+    response["key_insights"] = result["key_insights"]
+    
+    return response
+
+
+@router.post("/unified/brain1-only")
+def analyze_brain1_only(
+    request: UnifiedAnalysisRequest = UnifiedAnalysisRequest(),
+    roads: dict = Depends(load_roads_data),
+    cameras: dict = Depends(load_cameras_data),
+) -> dict:
+    """
+    Brain 1-only analysis — skips LLM, returns deterministic scores only.
+    
+    Useful for:
+    - Testing Brain 1 formulas
+    - Fast responses when LLM is unavailable
+    - Debugging data issues
+    """
+    result = run_analysis_pipeline(
+        roads_data=roads,
+        cameras_data=cameras,
+        top_n=request.top_n,
+        skip_llm=True,
+    )
+    
+    return {
+        "brain1_roads": result["brain1_roads"],
+        "brain1_cameras": result["brain1_cameras"],
+        "analysis_metadata": result["analysis_metadata"],
+    }
+
+
+@router.get("/health/ollama")
+def ollama_health() -> dict:
+    """Check Ollama LLM service health."""
+    return check_ollama_health()
 
 
 @router.post("/district", response_model=DistrictAnalyzeResponse)

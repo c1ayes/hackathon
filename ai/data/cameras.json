@@ -47,12 +47,16 @@
       "roiBreakevenMonths": 4,
       "roadClass": "arterial_intersection",
       "dailyTrafficVehicles": 48500,
+      "postCameraViolationRate": 0.52,
+      "postCameraViolationRateNote": "Drivers resume speeding 200m past camera — 52% violation rate in 200m-1km zone after camera. Key behavioral signal.",
+      "roadPolitenessScore": 0.73,
       "notes": "Highest volume intersection in the city. Al-Farabi 6-lane meets Dostyk Ave. Camera paying back in 4 months — benchmark case for ROI.",
       "dataFlags": {
         "violations": "T3_calibrated_monitored_busy_range",
         "accidents": "T3_calibrated_high_risk_range",
         "revenue": "T2_derived_from_formula",
-        "riskScore": "T3_model"
+        "riskScore": "T3_model",
+        "postCameraViolationRate": "T3_behavioral_estimate"
       }
     },
     {
@@ -73,12 +77,16 @@
       "roiBreakevenMonths": 5,
       "roadClass": "industrial_intersection",
       "dailyTrafficVehicles": 22000,
+      "postCameraViolationRate": 0.48,
+      "postCameraViolationRateNote": "Industrial trucks accelerate past camera toward warehouse district — 48% violation rate post-camera zone.",
+      "roadPolitenessScore": 0.65,
       "notes": "Red light violations dominate here — heavy trucks can't stop fast. Industrial zone approach. Elevated accident count relative to traffic volume.",
       "dataFlags": {
         "violations": "T3_calibrated_monitored_busy_range",
         "accidents": "T3_calibrated_high_risk_range",
         "revenue": "T2_derived_from_formula",
-        "riskScore": "T3_model"
+        "riskScore": "T3_model",
+        "postCameraViolationRate": "T3_behavioral_estimate"
       }
     },
     {
@@ -99,6 +107,9 @@
       "roiBreakevenMonths": 10,
       "roadClass": "central_pedestrian_zone",
       "dailyTrafficVehicles": 19500,
+      "postCameraViolationRate": 0.31,
+      "postCameraViolationRateNote": "Lower post-camera violation rate — school zone signage provides additional deterrent. Drivers remain cautious for ~800m past camera.",
+      "roadPolitenessScore": 0.81,
       "pedestrianRisk": true,
       "schoolNearby": true,
       "notes": "Lower violation count but elevated pedestrian risk — school nearby inflates severity. Camera here is welfare-justified even if ROI is lower.",
@@ -106,7 +117,8 @@
         "violations": "T3_calibrated_monitored_medium_range",
         "accidents": "T3_calibrated_medium_risk_range",
         "revenue": "T2_derived_from_formula",
-        "riskScore": "T3_model"
+        "riskScore": "T3_model",
+        "postCameraViolationRate": "T3_behavioral_estimate"
       }
     },
     {
@@ -127,12 +139,16 @@
       "roiBreakevenMonths": 5,
       "roadClass": "city_entry_arterial",
       "dailyTrafficVehicles": 24000,
+      "postCameraViolationRate": 0.58,
+      "postCameraViolationRateNote": "Highest post-camera violation rate — drivers entering city from highway revert to speed immediately after camera. 58% speeding in 100m-1km post-camera zone.",
+      "roadPolitenessScore": 0.62,
       "notes": "City entry point. Speeding dominant — drivers arriving from highway still traveling at highway speeds. Camera installed 2022 already generating strong returns.",
       "dataFlags": {
         "violations": "T3_calibrated_monitored_busy_range",
         "accidents": "T3_calibrated_high_risk_range",
         "revenue": "T2_derived_from_formula",
-        "riskScore": "T3_model"
+        "riskScore": "T3_model",
+        "postCameraViolationRate": "T3_behavioral_estimate"
       }
     },
     {
@@ -157,6 +173,10 @@
       "projectedRoiBreakevenMonths": 3,
       "roadClass": "residential_collector_gap",
       "dailyTrafficVehicles": 8200,
+      "postCameraViolationRate": 0.55,
+      "postCameraViolationRateNote": "Estimated from driver behavior patterns — residential collectors with no enforcement have ~55% baseline violation rate during peak hours.",
+      "roadPolitenessScore": null,
+      "roadPolitenessScoreNote": "Cannot derive — no camera to record violations. NULL is the data gap signal.",
       "aiFlag": {
         "priority": "HIGH",
         "reason": "2.1km unmonitored coverage gap. Absence of violation data is itself the risk signal — not evidence of safety. Adjacent cameras record 310–390 violations/month at higher-volume roads. Accident history of 3/year is floor estimate only.",
@@ -166,7 +186,8 @@
         "estimatedViolations": "T3_interpolated_from_adjacent",
         "accidents": "T3_underreported_floor_estimate",
         "projectedRevenue": "T2_derived_from_formula",
-        "riskScore": "T3_model_elevated_for_gap"
+        "riskScore": "T3_model_elevated_for_gap",
+        "postCameraViolationRate": "T3_behavioral_estimate_unmonitored"
       }
     },
     {
@@ -191,6 +212,10 @@
       "projectedRoiBreakevenMonths": 3,
       "roadClass": "arterial_unmonitored_stretch",
       "dailyTrafficVehicles": 41000,
+      "postCameraViolationRate": 0.68,
+      "postCameraViolationRateNote": "Highest estimated post-camera rate — Al-Farabi arterial is a known speed corridor. Drivers use the 1.7km gap as an unchecked speed zone. 68% estimated violation rate.",
+      "roadPolitenessScore": null,
+      "roadPolitenessScoreNote": "Cannot derive — no camera to record violations. NULL is the data gap signal.",
       "aiFlag": {
         "priority": "CRITICAL",
         "reason": "Highest estimated violation potential of all unmonitored zones. Located on Al-Farabi arterial corridor — drivers use the 1.7km gap between cam_001 and the city boundary as an unchecked speed zone. High-volume road (41k vehicles/day) with zero enforcement presence.",
@@ -200,7 +225,8 @@
         "estimatedViolations": "T3_interpolated_arterial_gap_model",
         "accidents": "T3_underreported_floor_estimate",
         "projectedRevenue": "T2_derived_from_formula",
-        "riskScore": "T3_model_elevated_critical"
+        "riskScore": "T3_model_elevated_critical",
+        "postCameraViolationRate": "T3_behavioral_estimate_unmonitored"
       }
     }
   ],
