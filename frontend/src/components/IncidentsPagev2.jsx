@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { camerasData, heatmapPoints, formatTenge } from "../data/mockData";
 import CameraDetailPanel from "./CameraDetailPanel";
 import RoadsLayer from "./RoadsLayer";
+import SimulationTab from "./SimulationTab";
 
 function HeatLayer() {
   const map = useMap();
@@ -56,7 +57,6 @@ function SectionPopup({ selected, onClose }) {
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
         </div>
-
         <div className="p-4 grid grid-cols-2 gap-4">
           <div>
             <div className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Суммарные финансы</div>
@@ -65,12 +65,9 @@ function SectionPopup({ selected, onClose }) {
               <div className="flex justify-between text-xs"><span className="text-gray-500">Доход / год</span><span className="font-medium text-green-600">{formatTenge(totalRevenue)}</span></div>
               <div className="flex justify-between text-xs"><span className="text-gray-500">Совокупный ROI</span><span className="font-medium text-blue-600">×{combinedRoi}</span></div>
               <div className="flex justify-between text-xs"><span className="text-gray-500">Окупаемость</span><span className="font-medium">~{payback} мес.</span></div>
-              <div className="text-xs text-green-700 bg-green-50 border border-green-100 rounded p-2 mt-2">
-                Установить все {total} → {formatTenge(totalRevenue)} / год
-              </div>
+              <div className="text-xs text-green-700 bg-green-50 border border-green-100 rounded p-2 mt-2">Установить все {total} → {formatTenge(totalRevenue)} / год</div>
             </div>
           </div>
-
           <div>
             <div className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Безопасность</div>
             <div className="space-y-1.5 mb-3">
@@ -90,7 +87,6 @@ function SectionPopup({ selected, onClose }) {
             </div>
           </div>
         </div>
-
         {selected.some((c) => c.gapDistance > 0) && (
           <div className="px-4 pb-3">
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
@@ -99,7 +95,6 @@ function SectionPopup({ selected, onClose }) {
             </div>
           </div>
         )}
-
         <div className="px-4 pb-4">
           <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg text-xs font-medium transition-colors">
             Запланировать установку всех {total} камер
@@ -110,7 +105,7 @@ function SectionPopup({ selected, onClose }) {
   );
 }
 
-export default function IncidentsPage() {
+function CamerasTab() {
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [multiSelected, setMultiSelected] = useState([]);
   const [isMultiMode, setIsMultiMode] = useState(false);
@@ -125,9 +120,7 @@ export default function IncidentsPage() {
     }, 500);
   }
 
-  function handleMouseUp() {
-    clearTimeout(holdTimer.current);
-  }
+  function handleMouseUp() { clearTimeout(holdTimer.current); }
 
   function handleCameraClick(cam) {
     if (isMultiMode) {
@@ -177,7 +170,6 @@ export default function IncidentsPage() {
           })}
         </MapContainer>
 
-        {/* top bar */}
         <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center justify-between pointer-events-none">
           <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 pointer-events-auto">
             <div className="text-xs font-medium text-gray-900">Камеры и дороги</div>
@@ -192,19 +184,13 @@ export default function IncidentsPage() {
           )}
         </div>
 
-        {/* legend */}
         <div className="absolute bottom-3 left-3 z-[1000] bg-white border border-gray-200 rounded-lg px-3 py-2">
           <div className="flex gap-3">
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />Активна
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />Не охвачено
-            </div>
+            <div className="flex items-center gap-1.5 text-xs text-gray-500"><span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />Активна</div>
+            <div className="flex items-center gap-1.5 text-xs text-gray-500"><span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />Не охвачено</div>
           </div>
         </div>
 
-        {/* multi-select floating bar */}
         {isMultiMode && multiSelected.length > 1 && !showSection && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[2000] pointer-events-auto">
             <div className="bg-white border border-gray-200 rounded-xl shadow-lg px-5 py-3 flex items-center gap-6">
@@ -233,6 +219,37 @@ export default function IncidentsPage() {
       {selectedCamera && !isMultiMode && (
         <CameraDetailPanel camera={selectedCamera} onClose={() => setSelectedCamera(null)} />
       )}
+    </div>
+  );
+}
+
+export default function IncidentsPage() {
+  const [tab, setTab] = useState("cameras");
+
+  return (
+    <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+      {/* tab bar */}
+      <div className="bg-white border-b border-gray-200 px-4 flex items-center gap-0 shrink-0">
+        {[
+          { id: "cameras", label: "Камеры и дороги" },
+          { id: "simulation", label: "Симуляция действий" },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`px-4 py-3 text-xs font-medium border-b-2 transition-colors ${
+              tab === t.id
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "cameras" && <CamerasTab />}
+      {tab === "simulation" && <SimulationTab />}
     </div>
   );
 }
