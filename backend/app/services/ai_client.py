@@ -25,3 +25,36 @@ async def call_simulate_action(payload: dict) -> dict:
             return r.json()
     except httpx.HTTPError as exc:
         raise HTTPException(status_code=502, detail=f"AI service unavailable: {exc}") from exc
+
+
+async def call_unified_analysis(payload: dict) -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            r = await client.post(f"{AI_SERVICE_URL}/analyze/unified", json=payload)
+            if r.status_code != 200:
+                raise HTTPException(status_code=502, detail=f"AI service error: {r.text}")
+            return r.json()
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"AI service unavailable: {exc}") from exc
+
+
+async def call_brain1_analysis(payload: dict) -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            r = await client.post(f"{AI_SERVICE_URL}/analyze/unified/brain1-only", json=payload)
+            if r.status_code != 200:
+                raise HTTPException(status_code=502, detail=f"AI service error: {r.text}")
+            return r.json()
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"AI service unavailable: {exc}") from exc
+
+
+async def call_ollama_health() -> dict:
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            r = await client.get(f"{AI_SERVICE_URL}/analyze/health/ollama")
+            if r.status_code != 200:
+                raise HTTPException(status_code=502, detail=f"AI service error: {r.text}")
+            return r.json()
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=502, detail=f"AI service unavailable: {exc}") from exc

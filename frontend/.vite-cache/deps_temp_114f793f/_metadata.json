@@ -1,0 +1,38 @@
+{
+  "hash": "87d96386",
+  "configHash": "47657f27",
+  "lockfileHash": "6a43e4c6",
+  "browserHash": "d5c08f03",
+  "optimized": {
+    "leaflet": {
+      "src": "../../node_modules/leaflet/dist/leaflet-src.js",
+      "file": "leaflet.js",
+      "fileHash": "9adbb09b",
+      "needsInterop": true
+    },
+    "react-leaflet": {
+      "src": "../../node_modules/react-leaflet/lib/index.js",
+      "file": "react-leaflet.js",
+      "fileHash": "e723b562",
+      "needsInterop": false
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "3069a9fb",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "ab9b8a76",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-BVTlhY3a": {
+      "file": "chunk-BVTlhY3a.js",
+      "isDynamicEntry": false
+    }
+  }
+}

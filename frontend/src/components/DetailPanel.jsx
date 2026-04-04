@@ -483,12 +483,12 @@ export default function DetailPanel({ type, data, enrichment, onClose }) {
   const trafficTier = getTrafficTierLabel(data.traffic_tier);
 
   return (
-    <div className="w-80 bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden h-full relative">
+    <div className="w-full bg-white border-l border-gray-200 flex flex-col shrink-0 overflow-hidden h-full relative shadow-lg">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+      <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-start justify-between gap-2 pr-6">
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-gray-900 leading-tight truncate">
+            <h2 className="text-base font-semibold text-gray-900 leading-tight">
               {isRoad ? '🛣️' : '📹'} {name || (isRoad ? data.segment_id : data.intersection_id)}
             </h2>
             <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -523,7 +523,7 @@ export default function DetailPanel({ type, data, enrichment, onClose }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         {isRoad ? (
           <RoadContent data={data} enrichment={enrichment} />
         ) : (

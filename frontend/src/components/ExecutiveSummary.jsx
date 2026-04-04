@@ -8,7 +8,7 @@ import { formatTenge } from '../utils/formatters';
 export default function ExecutiveSummary({ data }) {
   if (!data) {
     return (
-      <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl p-4 text-white">
         <p className="text-slate-300">Загрузка данных анализа...</p>
       </div>
     );
@@ -85,7 +85,7 @@ export default function ExecutiveSummary({ data }) {
 
   return (
     <div
-      className={`bg-gradient-to-r ${getGradientClass()} rounded-xl p-6 text-white shadow-xl relative overflow-hidden`}
+      className={`bg-gradient-to-r ${getGradientClass()} rounded-xl px-5 py-4 text-white shadow-lg relative overflow-hidden`}
     >
       {/* Background pattern for visual interest */}
       <div className="absolute inset-0 opacity-10">
@@ -95,7 +95,7 @@ export default function ExecutiveSummary({ data }) {
 
       <div className="relative z-10">
         {/* Top row: Badges */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
           {/* Pipeline mode badge */}
           <span
             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
@@ -143,10 +143,10 @@ export default function ExecutiveSummary({ data }) {
         </div>
 
         {/* Headline */}
-        <h2 className={`text-2xl font-bold mb-6 ${hasCriticalRisk ? 'animate-pulse' : ''}`}>
+        <h2 className={`text-xl font-bold mb-4 leading-tight ${hasCriticalRisk ? 'animate-pulse' : ''}`}>
           {hasUrgentIssues && (
             <span className="inline-block mr-2">
-              <svg className="w-7 h-7 inline-block text-white" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-5 h-5 inline-block text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </span>
@@ -155,56 +155,56 @@ export default function ExecutiveSummary({ data }) {
         </h2>
 
         {/* Key metrics row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {/* Savings */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <div className="text-white/70 text-xs uppercase tracking-wide mb-1">
               Экономия
             </div>
-            <div className="text-xl font-bold text-white">
+            <div className="text-lg font-bold text-white">
               {formatTenge(totalSavings, true)}
             </div>
           </div>
 
           {/* Projected revenue */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <div className="text-white/70 text-xs uppercase tracking-wide mb-1">
               Прогноз доходов
             </div>
-            <div className="text-xl font-bold text-white">
+            <div className="text-lg font-bold text-white">
               {formatTenge(projectedRevenue, true)}
             </div>
           </div>
 
           {/* Critical segments */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <div className="text-white/70 text-xs uppercase tracking-wide mb-1">
               Критичные участки
             </div>
-            <div className={`text-xl font-bold ${criticalCount > 0 ? 'text-red-300' : 'text-green-300'}`}>
+            <div className={`text-lg font-bold ${criticalCount > 0 ? 'text-red-300' : 'text-green-300'}`}>
               {criticalCount}
             </div>
           </div>
 
           {/* Camera blind spots */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
             <div className="text-white/70 text-xs uppercase tracking-wide mb-1">
               Слепые зоны камер
             </div>
-            <div className={`text-xl font-bold ${unmonitoredCount > 0 ? 'text-amber-300' : 'text-green-300'}`}>
+            <div className={`text-lg font-bold ${unmonitoredCount > 0 ? 'text-amber-300' : 'text-green-300'}`}>
               {unmonitoredCount}
             </div>
           </div>
         </div>
 
         {/* Bottom row: Confidence meter and additional info */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Confidence meter */}
           {overallConfidence !== null && (
             <div className="flex items-center gap-3">
-              <div className="relative w-16 h-16">
+              <div className="relative w-14 h-14">
                 {/* Circular progress */}
-                <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+                <svg className="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
                   {/* Background circle */}
                   <circle
                     cx="18"

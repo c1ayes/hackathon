@@ -78,7 +78,7 @@ function createCameraIcon(camera, isSelected) {
 /**
  * Component to handle map view updates when selection changes
  */
-function MapController({ selectedCoords }) {
+function MapController({ selectedCoords, roads, cameras }) {
   const map = useMap();
   
   useEffect(() => {
@@ -86,8 +86,30 @@ function MapController({ selectedCoords }) {
       map.flyTo([selectedCoords.lat, selectedCoords.lng], Math.max(map.getZoom(), 14), {
         duration: 0.5,
       });
+      return;
     }
-  }, [map, selectedCoords]);
+
+    const points = [...(roads || []), ...(cameras || [])]
+      .map((item) => item.coordinates)
+      .filter(Boolean)
+      .map((coords) => [coords.lat, coords.lng]);
+
+    if (points.length === 1) {
+      map.flyTo(points[0], 14, { duration: 0.5 });
+      return;
+    }
+
+    if (points.length > 1) {
+      map.flyToBounds(points, {
+        padding: [32, 32],
+        duration: 0.5,
+        maxZoom: 14,
+      });
+      return;
+    }
+
+    map.flyTo(ALMATY_CENTER, DEFAULT_ZOOM, { duration: 0.5 });
+  }, [cameras, map, roads, selectedCoords]);
   
   return null;
 }
@@ -144,6 +166,7 @@ export default function MapView({
   cameras = [],
   overlaps = [],
   selectedId = null,
+  districtLabel = 'All districts',
   onSelectRoad,
   onSelectCamera,
 }) {
@@ -184,7 +207,7 @@ export default function MapView({
         />
         
         {/* Map controller for selection-based view updates */}
-        <MapController selectedCoords={selectedCoords} />
+        <MapController selectedCoords={selectedCoords} roads={roads} cameras={cameras} />
         
         {/* Overlap connection lines (render first, lowest z-index) */}
         {overlapConnections.map((conn, idx) => (
@@ -360,6 +383,16 @@ export default function MapView({
           );
         })}
       </MapContainer>
+
+      <div className="pointer-events-none absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg ring-1 ring-slate-200 backdrop-blur">
+        <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Map focus</div>
+        <div className="mt-1 text-sm font-semibold text-slate-900">{districtLabel}</div>
+        <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
+          <span>{roads.length} roads</span>
+          <span>{cameras.length} cameras</span>
+          <span>{overlapConnections.length} overlaps</span>
+        </div>
+      </div>
       
       {/* CSS for pulse animation on selected markers */}
       <style>{`

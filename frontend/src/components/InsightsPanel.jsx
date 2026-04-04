@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getOverlapTypeLabel } from "../utils/formatters";
+import { formatTenge, getOverlapTypeLabel } from "../utils/formatters";
 
 function ConfidenceMeter({ score }) {
   const filledBlocks = Math.round((score / 100) * 5);
@@ -329,7 +329,53 @@ function AnomaliesTab({ anomalies }) {
   );
 }
 
-export default function InsightsPanel({ brain2, roads, cameras }) {
+function QuickDecisionStrip({ executiveSummary, recommendations }) {
+  if (!executiveSummary) return null;
+
+  const topRecommendation = recommendations?.[0];
+
+  return (
+    <div className="border-b border-gray-200 bg-slate-900 px-4 py-3 text-white">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-slate-300">Сводка решений</div>
+          <div className="mt-1 text-sm font-semibold leading-5">
+            {executiveSummary.headline || "Сводка по району"}
+          </div>
+          {topRecommendation?.recommendation && (
+            <div className="mt-2 text-xs leading-5 text-slate-300">
+              Приоритетное действие: {topRecommendation.recommendation}
+            </div>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="rounded-xl bg-white/10 px-3 py-2">
+            <div className="text-slate-400">Экономия</div>
+            <div className="mt-1 font-semibold text-white">
+              {formatTenge(executiveSummary.total_potential_savings_tenge || 0, true)}
+            </div>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2">
+            <div className="text-slate-400">Доход</div>
+            <div className="mt-1 font-semibold text-white">
+              {formatTenge(executiveSummary.total_projected_revenue_tenge || 0, true)}
+            </div>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2">
+            <div className="text-slate-400">Дорог в риске</div>
+            <div className="mt-1 font-semibold text-white">{executiveSummary.critical_road_segments || 0}</div>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2">
+            <div className="text-slate-400">Слепых зон</div>
+            <div className="mt-1 font-semibold text-white">{executiveSummary.unmonitored_camera_zones || 0}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function InsightsPanel({ brain2, roads, cameras, executiveSummary, recommendations }) {
   const [activeTab, setActiveTab] = useState("enrichment");
 
   if (!brain2) {
@@ -353,6 +399,8 @@ export default function InsightsPanel({ brain2, roads, cameras }) {
 
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+      <QuickDecisionStrip executiveSummary={executiveSummary} recommendations={recommendations} />
+
       {/* Header */}
       <div className="bg-white px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
