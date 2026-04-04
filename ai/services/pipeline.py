@@ -76,6 +76,11 @@ def run_analysis_pipeline(
     
     # Parse and validate response
     brain2 = parse_brain2_response(brain2_raw)
+    brain2["enrichment"] = _ensure_enrichment_coverage(
+        brain2.get("enrichment", {}),
+        brain1_roads.get("segments", [])[:top_n],
+        brain1_cameras.get("intersections", [])[:top_n],
+    )
     
     # Extract key insights for dashboard summary
     key_insights = extract_key_insights(brain2)
@@ -97,6 +102,107 @@ def run_analysis_pipeline(
             "brain2_confidence": brain2["overall_confidence"]["score_pct"],
         },
     }
+
+
+def _ensure_enrichment_coverage(
+    enrichment: dict[str, Any],
+    top_roads: list[dict[str, Any]],
+    top_cameras: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
+    roads = list(enrichment.get("roads") or [])
+    cameras = list(enrichment.get("cameras") or [])
+
+    road_ids = {item.get("segment_id") for item in roads}
+    for road in top_roads:
+        segment_id = road.get("segment_id")
+        if segment_id in road_ids:
+            continue
+        roads.append(
+            {
+                "segment_id": segment_id,
+                "hidden_risks": _fallback_road_hidden_risks(road),
+                "urgency_adjustment": "higher" if road.get("is_critical") else "unchanged",
+                "reasoning": _fallback_road_reasoning(road),
+                "seasonal_note": _fallback_road_seasonal_note(road),
+            }
+        )
+
+    camera_ids = {item.get("intersection_id") for item in cameras}
+    for camera in top_cameras:
+        intersection_id = camera.get("intersection_id")
+        if intersection_id in camera_ids:
+            continue
+        cameras.append(
+            {
+                "intersection_id": intersection_id,
+                "hidden_risks": _fallback_camera_hidden_risks(camera),
+                "urgency_adjustment": "higher" if camera.get("is_survivorship_bias_case") else "unchanged",
+                "reasoning": _fallback_camera_reasoning(camera),
+                "survivorship_bias_note": _fallback_camera_bias_note(camera),
+            }
+        )
+
+    return {"roads": roads, "cameras": cameras}
+
+
+def _fallback_road_hidden_risks(road: dict[str, Any]) -> str:
+    risks: list[str] = []
+    if road.get("is_high_freeze_risk"):
+        risks.append("сезонные циклы заморозки и оттаивания могут ускорить разрушение покрытия")
+    if road.get("is_truck_heavy"):
+        risks.append("высокая доля грузового транспорта создаёт нелинейную нагрузку на полотно")
+    if road.get("failure_probability_12mo", 0) >= 0.5:
+        risks.append("есть высокий риск быстрого перехода к аварийному ремонту в ближайшие 12 месяцев")
+    if not risks:
+        risks.append("объект требует наблюдения из-за сочетания инфраструктурной нагрузки и финансового риска")
+    sentence = "; ".join(risks)
+    return sentence[:1].upper() + sentence[1:] + "."
+
+
+def _fallback_road_reasoning(road: dict[str, Any]) -> str:
+    notes = road.get("notes")
+    if notes:
+        return notes
+    return (
+        f"Сегмент {road.get('name', road.get('segment_id', 'дороги'))} входит в верхнюю часть рейтинга Brain 1 "
+        f"с приоритетом {round(float(road.get('priority_score', 0)))} и требует внимания по совокупности риска и стоимости."
+    )
+
+
+def _fallback_road_seasonal_note(road: dict[str, Any]) -> str:
+    if road.get("is_high_freeze_risk"):
+        return "Для этого сегмента особенно важен ремонт до периода активных перепадов температуры."
+    return "Сезонный фактор умеренный, но откладывание ремонта увеличивает стоимость вмешательства."
+
+
+def _fallback_camera_hidden_risks(camera: dict[str, Any]) -> str:
+    risks: list[str] = []
+    if not camera.get("is_monitored"):
+        risks.append("отсутствие камеры скрывает часть нарушений и создаёт ложное ощущение безопасности")
+    if camera.get("is_critical_gap"):
+        risks.append("критический пробел в покрытии повышает риск незафиксированных инцидентов")
+    if camera.get("is_high_violation_zone"):
+        risks.append("высокая интенсивность нарушений указывает на потребность в приоритетном контроле")
+    if not risks:
+        risks.append("объект требует дополнительного наблюдения для уточнения реального уровня риска")
+    sentence = "; ".join(risks)
+    return sentence[:1].upper() + sentence[1:] + "."
+
+
+def _fallback_camera_reasoning(camera: dict[str, Any]) -> str:
+    notes = camera.get("notes")
+    if notes:
+        return notes
+    return (
+        f"Узел {camera.get('name', camera.get('intersection_id', 'камеры'))} находится в верхней группе Brain 1 "
+        f"с приоритетом {round(float(camera.get('priority_score', 0)))} и требует отдельного внимания."
+    )
+
+
+def _fallback_camera_bias_note(camera: dict[str, Any]) -> str | None:
+    if camera.get("is_survivorship_bias_case"):
+        return "Отсутствие записей о нарушениях здесь не означает безопасность: данные могут отсутствовать из-за отсутствия камеры."
+    return None
 
 
 def run_roads_only_pipeline(roads_data: dict, top_n: int = 3) -> dict:
