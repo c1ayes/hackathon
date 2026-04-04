@@ -92,10 +92,93 @@ function UrgencyIndicator({ adjustment }) {
   );
 }
 
+function buildIssueList(data, type, enrichment) {
+  const issues = [];
+
+  if (type === 'road') {
+    if (data.is_critical) issues.push('\u041a\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0435 \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u043f\u043e\u043a\u0440\u044b\u0442\u0438\u044f \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043f\u0435\u0440\u0432\u043e\u043e\u0447\u0435\u0440\u0435\u0434\u043d\u043e\u0433\u043e \u0432\u043c\u0435\u0448\u0430\u0442\u0435\u043b\u044c\u0441\u0442\u0432\u0430.');
+    if (data.defects_per_100m >= 8) issues.push(`\u0412\u044b\u0441\u043e\u043a\u0430\u044f \u043f\u043b\u043e\u0442\u043d\u043e\u0441\u0442\u044c \u0434\u0435\u0444\u0435\u043a\u0442\u043e\u0432: ${data.defects_per_100m} \u043d\u0430 100 \u043c.`);
+    if (data.is_high_freeze_risk) issues.push('\u0421\u0435\u0433\u043c\u0435\u043d\u0442 \u0441\u0438\u043b\u044c\u043d\u043e \u043f\u043e\u0434\u0432\u0435\u0440\u0436\u0435\u043d \u0441\u0435\u0437\u043e\u043d\u043d\u043e\u043c\u0443 \u0440\u0430\u0437\u0440\u0443\u0448\u0435\u043d\u0438\u044e \u0438\u0437-\u0437\u0430 \u0446\u0438\u043a\u043b\u043e\u0432 \u0437\u0430\u043c\u043e\u0440\u043e\u0437\u043a\u0438 \u0438 \u043e\u0442\u0442\u0430\u0438\u0432\u0430\u043d\u0438\u044f.');
+    if (data.is_truck_heavy) issues.push('\u0412\u044b\u0441\u043e\u043a\u0430\u044f \u0434\u043e\u043b\u044f \u0433\u0440\u0443\u0437\u043e\u0432\u043e\u0433\u043e \u0442\u0440\u0430\u043d\u0441\u043f\u043e\u0440\u0442\u0430 \u0443\u0441\u043a\u043e\u0440\u044f\u0435\u0442 \u0434\u0435\u0433\u0440\u0430\u0434\u0430\u0446\u0438\u044e \u0434\u043e\u0440\u043e\u0436\u043d\u043e\u0433\u043e \u043f\u043e\u043b\u043e\u0442\u043d\u0430.');
+    if (data.failure_probability_12mo >= 0.5) issues.push('\u0415\u0441\u0442\u044c \u0432\u044b\u0441\u043e\u043a\u0438\u0439 \u0440\u0438\u0441\u043a \u0441\u0435\u0440\u044c\u0451\u0437\u043d\u043e\u0433\u043e \u0443\u0445\u0443\u0434\u0448\u0435\u043d\u0438\u044f \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f \u0432 \u0442\u0435\u0447\u0435\u043d\u0438\u0435 \u0431\u043b\u0438\u0436\u0430\u0439\u0448\u0438\u0445 12 \u043c\u0435\u0441\u044f\u0446\u0435\u0432.');
+    if (data.financial_impact?.estimated_days_until_failure <= 120) {
+      issues.push(`\u041e\u043a\u043d\u043e \u0434\u043b\u044f \u043f\u0440\u043e\u0444\u0438\u043b\u0430\u043a\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u0440\u0435\u043c\u043e\u043d\u0442\u0430 \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u043e: \u043e\u043a\u043e\u043b\u043e ${Math.round(data.financial_impact.estimated_days_until_failure)} \u0434\u043d\u0435\u0439.`);
+    }
+  } else {
+    if (!data.is_monitored) issues.push('\u0423\u0447\u0430\u0441\u0442\u043e\u043a \u043d\u0435 \u043f\u043e\u043a\u0440\u044b\u0442 \u043a\u0430\u043c\u0435\u0440\u043e\u0439, \u043f\u043e\u044d\u0442\u043e\u043c\u0443 \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u044f \u0438 \u0438\u043d\u0446\u0438\u0434\u0435\u043d\u0442\u044b \u0444\u0438\u043a\u0441\u0438\u0440\u0443\u044e\u0442\u0441\u044f \u043d\u0435 \u043f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e.');
+    if (data.is_critical_gap) issues.push('\u0415\u0441\u0442\u044c \u043a\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u043f\u0440\u043e\u0431\u0435\u043b \u0432 \u043f\u043e\u043a\u0440\u044b\u0442\u0438\u0438 \u043d\u0430\u0431\u043b\u044e\u0434\u0435\u043d\u0438\u0435\u043c.');
+    if (data.is_high_violation_zone) issues.push('\u0417\u043e\u043d\u0430 \u043f\u043e\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u0432\u044b\u0441\u043e\u043a\u0438\u0439 \u0443\u0440\u043e\u0432\u0435\u043d\u044c \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439 \u0438 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u043f\u0440\u0438\u043e\u0440\u0438\u0442\u0435\u0442\u043d\u043e\u0433\u043e \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044f.');
+    if (data.accidents_per_year >= 3) issues.push(`\u041f\u043e\u0432\u044b\u0448\u0435\u043d\u043d\u0430\u044f \u0430\u0432\u0430\u0440\u0438\u0439\u043d\u043e\u0441\u0442\u044c: ${data.accidents_per_year} \u0438\u043d\u0446\u0438\u0434\u0435\u043d\u0442\u0430(\u043e\u0432) \u0432 \u0433\u043e\u0434.`);
+    if (data.coverage_gap_km >= 1) issues.push(`\u0411\u043e\u043b\u044c\u0448\u043e\u0439 \u0440\u0430\u0437\u0440\u044b\u0432 \u043c\u0435\u0436\u0434\u0443 \u0442\u043e\u0447\u043a\u0430\u043c\u0438 \u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044f: ${data.coverage_gap_km} \u043a\u043c.`);
+    if (data.is_survivorship_bias_case) issues.push('\u0415\u0441\u0442\u044c \u0440\u0438\u0441\u043a \u043e\u0448\u0438\u0431\u043e\u0447\u043d\u043e\u0439 \u043e\u0446\u0435\u043d\u043a\u0438 \u0438\u0437-\u0437\u0430 survivorship bias: \u043d\u0443\u0436\u043d\u044b \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0435 \u043d\u0430\u0431\u043b\u044e\u0434\u0435\u043d\u0438\u044f.');
+  }
+
+  if (enrichment?.hidden_risks) {
+    issues.unshift(enrichment.hidden_risks);
+  }
+
+  return [...new Set(issues)].slice(0, 5);
+}
+
+function AIEnrichmentBlock({ data, type, enrichment, brain2Online }) {
+  const issues = buildIssueList(data, type, enrichment);
+
+  return (
+    <Block className={brain2Online ? 'bg-purple-50 border-purple-200' : 'bg-amber-50 border-amber-200'}>
+      <BlockLabel icon="AI">{'\u0412\u044b\u0432\u043e\u0434 \u0418\u0418'}</BlockLabel>
+
+      {issues.length > 0 && (
+        <div className="mb-3">
+          <div className={brain2Online ? 'mb-2 text-xs font-medium uppercase tracking-wider text-purple-600' : 'mb-2 text-xs font-medium uppercase tracking-wider text-amber-700'}>
+            {'\u041f\u0440\u043e\u0431\u043b\u0435\u043c\u044b \u0441\u0435\u0433\u043c\u0435\u043d\u0442\u0430'}
+          </div>
+          <ul className={brain2Online ? 'space-y-2 text-sm text-gray-800' : 'space-y-2 text-sm text-amber-900'}>
+            {issues.map((issue) => (
+              <li key={issue} className="flex gap-2">
+                <span className={brain2Online ? 'mt-0.5 text-purple-500' : 'mt-0.5 text-amber-600'}>{'\u2022'}</span>
+                <span>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!brain2Online ? (
+        <p className="text-sm text-amber-900 leading-relaxed">
+          {'Brain 2 \u0441\u0435\u0439\u0447\u0430\u0441 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d. \u041f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u0435 \u043c\u043e\u0434\u0435\u043b\u044c \u0432 Ollama, \u0447\u0442\u043e\u0431\u044b \u043f\u043e\u043b\u0443\u0447\u0438\u0442\u044c \u043e\u0431\u044a\u044f\u0441\u043d\u0435\u043d\u0438\u0435 \u0440\u0438\u0441\u043a\u043e\u0432 \u0438 \u0431\u043e\u043b\u0435\u0435 \u0442\u043e\u0447\u043d\u0443\u044e \u0438\u043d\u0442\u0435\u0440\u043f\u0440\u0435\u0442\u0430\u0446\u0438\u044e \u043f\u043e \u0432\u044b\u0431\u0440\u0430\u043d\u043d\u043e\u043c\u0443 \u043e\u0431\u044a\u0435\u043a\u0442\u0443.'}
+        </p>
+      ) : (
+        <>
+          {enrichment?.reasoning && (
+            <p className="text-xs text-gray-600 leading-relaxed mb-3 italic">{enrichment.reasoning}</p>
+          )}
+          <UrgencyIndicator adjustment={enrichment?.urgency_adjustment} />
+          {enrichment?.seasonal_note && (
+            <div className="flex items-start gap-2 mt-3 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded p-2">
+              <span>{'\u0421\u0435\u0437\u043e\u043d\u043d\u043e\u0441\u0442\u044c:'}</span>
+              <span>{enrichment.seasonal_note}</span>
+            </div>
+          )}
+          {enrichment?.survivorship_bias_note && (
+            <div className="flex items-start gap-2 mt-3 text-xs text-purple-700 bg-purple-100 border border-purple-200 rounded p-2">
+              <span>{'\u041f\u0440\u0438\u043c\u0435\u0447\u0430\u043d\u0438\u0435:'}</span>
+              <span>{enrichment.survivorship_bias_note}</span>
+            </div>
+          )}
+          {!enrichment && (
+            <p className="text-sm text-slate-700 leading-relaxed">
+              {'Brain 2 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d, \u043d\u043e \u0434\u043b\u044f \u044d\u0442\u043e\u0433\u043e \u043e\u0431\u044a\u0435\u043a\u0442\u0430 \u043d\u0435 \u043f\u0440\u0438\u0448\u0451\u043b \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u044b\u0439 \u043a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0439.'}
+            </p>
+          )}
+        </>
+      )}
+    </Block>
+  );
+}
 /**
  * Road segment detail content
  */
-function RoadContent({ data, enrichment }) {
+function RoadContent({ data, enrichment, brain2Online }) {
   const priorityScore = data.priority_score ?? 0;
   const severityColor = getSeverityColor(priorityScore);
   const severityLabel = getSeverityLabel(priorityScore);
@@ -234,28 +317,7 @@ function RoadContent({ data, enrichment }) {
       </Block>
 
       {/* Brain 2 Enrichment */}
-      {enrichment && (
-        <Block className="bg-purple-50 border-purple-200">
-          <BlockLabel icon="🧠">Анализ Brain 2</BlockLabel>
-          {enrichment.hidden_risks && (
-            <p className="text-xs text-gray-700 leading-relaxed mb-3">
-              "{enrichment.hidden_risks}"
-            </p>
-          )}
-          {enrichment.reasoning && (
-            <p className="text-xs text-gray-600 leading-relaxed mb-3 italic">
-              {enrichment.reasoning}
-            </p>
-          )}
-          <UrgencyIndicator adjustment={enrichment.urgency_adjustment} />
-          {enrichment.seasonal_note && (
-            <div className="flex items-start gap-2 mt-3 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded p-2">
-              <span>📅</span>
-              <span>"{enrichment.seasonal_note}"</span>
-            </div>
-          )}
-        </Block>
-      )}
+      <AIEnrichmentBlock data={data} type="road" enrichment={enrichment} brain2Online={brain2Online} />
 
       {/* Data Completeness */}
       <Block>
@@ -278,7 +340,7 @@ function RoadContent({ data, enrichment }) {
 /**
  * Camera zone detail content
  */
-function CameraContent({ data, enrichment }) {
+function CameraContent({ data, enrichment, brain2Online }) {
   const priorityScore = data.priority_score ?? 0;
   const severityColor = getSeverityColor(priorityScore);
   const severityLabel = getSeverityLabel(priorityScore);
@@ -428,28 +490,7 @@ function CameraContent({ data, enrichment }) {
       </Block>
 
       {/* Brain 2 Enrichment */}
-      {enrichment && (
-        <Block className="bg-purple-50 border-purple-200">
-          <BlockLabel icon="🧠">Анализ Brain 2</BlockLabel>
-          {enrichment.hidden_risks && (
-            <p className="text-xs text-gray-700 leading-relaxed mb-3">
-              "{enrichment.hidden_risks}"
-            </p>
-          )}
-          {enrichment.reasoning && (
-            <p className="text-xs text-gray-600 leading-relaxed mb-3 italic">
-              {enrichment.reasoning}
-            </p>
-          )}
-          <UrgencyIndicator adjustment={enrichment.urgency_adjustment} />
-          {enrichment.survivorship_bias_note && (
-            <div className="flex items-start gap-2 mt-3 text-xs text-purple-700 bg-purple-100 border border-purple-200 rounded p-2">
-              <span>👁️</span>
-              <span>"{enrichment.survivorship_bias_note}"</span>
-            </div>
-          )}
-        </Block>
-      )}
+      <AIEnrichmentBlock data={data} type="camera" enrichment={enrichment} brain2Online={brain2Online} />
 
       {/* Data Completeness */}
       <Block>
@@ -472,7 +513,7 @@ function CameraContent({ data, enrichment }) {
 /**
  * Detail panel for road segments and camera zones
  */
-export default function DetailPanel({ type, data, enrichment, onClose }) {
+export default function DetailPanel({ type, data, enrichment, brain2Online, onClose }) {
   if (!type || !data) return null;
 
   const isRoad = type === 'road';
@@ -525,9 +566,9 @@ export default function DetailPanel({ type, data, enrichment, onClose }) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         {isRoad ? (
-          <RoadContent data={data} enrichment={enrichment} />
+          <RoadContent data={data} enrichment={enrichment} brain2Online={brain2Online} />
         ) : (
-          <CameraContent data={data} enrichment={enrichment} />
+          <CameraContent data={data} enrichment={enrichment} brain2Online={brain2Online} />
         )}
       </div>
 

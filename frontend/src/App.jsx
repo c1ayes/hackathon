@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ExecutiveSummary from "./components/ExecutiveSummary";
 import MapView from "./components/MapView";
 import DetailPanel from "./components/DetailPanel";
@@ -27,19 +27,6 @@ function ToggleButton({ active, children, onClick }) {
   );
 }
 
-function getVisibleDistricts(cityOverview) {
-  if (!cityOverview?.districts) return [];
-  return [...cityOverview.districts].sort((a, b) => a.name.localeCompare(b.name, "ru"));
-}
-
-function normalizeDistrictName(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/district/g, "")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
-    .trim();
-}
-
 function getActiveAlertCount(roads) {
   return roads.filter((road) => {
     const days = road?.financial_impact?.estimated_days_until_failure;
@@ -50,6 +37,10 @@ function getActiveAlertCount(roads) {
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
+
+const BOTTOM_MIN_HEIGHT = 220;
+const BOTTOM_DEFAULT_HEIGHT = 256;
+const BOTTOM_MAX_HEIGHT = 420;
 
 export default function App() {
   const appRef = useRef(null);
@@ -63,12 +54,11 @@ export default function App() {
   const [serviceOnline, setServiceOnline] = useState(null);
   const [brain2Online, setBrain2Online] = useState(null);
   const [cityOverview, setCityOverview] = useState(null);
-  const [districtFilter, setDistrictFilter] = useState("all");
   const [entityMode, setEntityMode] = useState("both");
   const [sidebarWidth, setSidebarWidth] = useState(224);
   const [detailWidth, setDetailWidth] = useState(520);
   const [cameraPanelWidth, setCameraPanelWidth] = useState(320);
-  const [bottomHeight, setBottomHeight] = useState(256);
+  const [bottomHeight, setBottomHeight] = useState(BOTTOM_DEFAULT_HEIGHT);
   const [activeResize, setActiveResize] = useState(null);
 
   useEffect(() => {
@@ -105,7 +95,7 @@ export default function App() {
       }
 
       if (activeResize === "bottom" && mainRect) {
-        setBottomHeight(clamp(mainRect.bottom - event.clientY, 220, 420));
+        setBottomHeight(clamp(mainRect.bottom - event.clientY, BOTTOM_MIN_HEIGHT, BOTTOM_MAX_HEIGHT));
       }
     }
 
@@ -156,6 +146,12 @@ export default function App() {
     setSelectedId(null);
   }
 
+  function toggleBottomPanelHeight() {
+    setBottomHeight((currentHeight) =>
+      currentHeight >= BOTTOM_MAX_HEIGHT - 8 ? BOTTOM_DEFAULT_HEIGHT : BOTTOM_MAX_HEIGHT
+    );
+  }
+
   function getSelectedData() {
     if (!analysisResult) return null;
     if (selectedType === "road") {
@@ -189,34 +185,14 @@ export default function App() {
   const cameras = analysisResult?.brain1_cameras?.intersections || [];
   const overlaps = analysisResult?.brain2?.overlaps || [];
 
-  const filteredRoads = useMemo(() => {
-    if (districtFilter === "all") return roads;
-    const targetDistrict = normalizeDistrictName(districtFilter);
-    return roads.filter((road) => normalizeDistrictName(road.district) === targetDistrict);
-  }, [districtFilter, roads]);
-
-  const filteredCameras = useMemo(() => {
-    if (districtFilter === "all") return cameras;
-    const targetDistrict = normalizeDistrictName(districtFilter);
-    return cameras.filter((camera) => normalizeDistrictName(camera.district) === targetDistrict);
-  }, [districtFilter, cameras]);
-
-  const visibleRoads = entityMode === "cameras" ? [] : filteredRoads;
-  const visibleCameras = entityMode === "roads" ? [] : filteredCameras;
-  const districts = getVisibleDistricts(cityOverview);
+  const visibleRoads = entityMode === "cameras" ? [] : roads;
+  const visibleCameras = entityMode === "roads" ? [] : cameras;
   const backendSegments = cityOverview?.segments || [];
-
-  const currentDistrict =
-    districtFilter === "all"
-      ? {
-          budget_available: districts.reduce(
-            (sum, district) => sum + (district.budget_available || 0),
-            0
-          ),
-        }
-      : districts.find((district) => district.name === districtFilter) || null;
-
-  const activeAlertCount = getActiveAlertCount(filteredRoads);
+  const cityBudgetAvailable = (cityOverview?.districts || []).reduce(
+    (sum, district) => sum + (district.budget_available || 0),
+    0
+  );
+  const activeAlertCount = getActiveAlertCount(roads);
 
   return (
     <div ref={appRef} className="flex h-full overflow-hidden bg-gray-100 select-none">
@@ -304,18 +280,6 @@ export default function App() {
               <span className="rounded-full bg-slate-900 px-3 py-1.5 text-xs font-medium text-white">
                 {cityOverview?.city || "Almaty"}
               </span>
-              <select
-                value={districtFilter}
-                onChange={(event) => setDistrictFilter(event.target.value)}
-                className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-700 outline-none"
-              >
-                <option value="all">Все районы</option>
-                {districts.map((district) => (
-                  <option key={district.id} value={district.name}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
               <div className="flex items-center gap-1 rounded-full bg-slate-100 p-1">
                 <ToggleButton active={entityMode === "roads"} onClick={() => setEntityMode("roads")}>
                   Дороги
@@ -334,7 +298,7 @@ export default function App() {
 
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-full bg-emerald-50 px-3 py-1.5 font-medium text-emerald-700">
-                Бюджет: {formatTenge(currentDistrict?.budget_available ?? 0, true)}
+                Бюджет: {formatTenge(cityBudgetAvailable, true)}
               </span>
               <span
                 className={`rounded-full px-3 py-1.5 font-medium ${
@@ -387,7 +351,7 @@ export default function App() {
                 cameras={visibleCameras}
                 overlaps={overlaps}
                 selectedId={selectedId}
-                districtLabel={districtFilter === "all" ? "Все районы" : districtFilter}
+                districtLabel="??? ??????"
                 onSelectRoad={handleSelectRoad}
                 onSelectCamera={handleSelectCamera}
               />
@@ -406,6 +370,7 @@ export default function App() {
                   type={selectedType}
                   data={selectedData}
                   enrichment={selectedEnrichment}
+                  brain2Online={brain2Online}
                   onClose={handleCloseDetail}
                 />
               </div>
@@ -413,11 +378,20 @@ export default function App() {
           )}
         </div>
 
-        <div
-          onMouseDown={() => setActiveResize("bottom")}
-          className="h-1.5 shrink-0 cursor-row-resize bg-transparent hover:bg-blue-200 active:bg-blue-300 transition-colors"
-          aria-hidden="true"
-        />
+        <div className="relative h-6 shrink-0 border-t border-gray-200 bg-white">
+          <div
+            onMouseDown={() => setActiveResize("bottom")}
+            className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 cursor-row-resize bg-transparent hover:bg-blue-200 active:bg-blue-300 transition-colors"
+            aria-hidden="true"
+          />
+          <button
+            type="button"
+            onClick={toggleBottomPanelHeight}
+            className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
+          >
+            {bottomHeight >= BOTTOM_MAX_HEIGHT - 8 ? "Свернуть панель" : "Развернуть панель"}
+          </button>
+        </div>
 
         <div
           style={{ height: bottomHeight }}

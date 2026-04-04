@@ -384,16 +384,6 @@ export default function MapView({
         })}
       </MapContainer>
 
-      <div className="pointer-events-none absolute left-4 top-4 z-[500] rounded-2xl bg-white/95 px-4 py-3 shadow-lg ring-1 ring-slate-200 backdrop-blur">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Map focus</div>
-        <div className="mt-1 text-sm font-semibold text-slate-900">{districtLabel}</div>
-        <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
-          <span>{roads.length} roads</span>
-          <span>{cameras.length} cameras</span>
-          <span>{overlapConnections.length} overlaps</span>
-        </div>
-      </div>
-      
       {/* CSS for pulse animation on selected markers */}
       <style>{`
         .camera-marker {
