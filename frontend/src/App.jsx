@@ -4,7 +4,7 @@ import MapView from "./components/MapView";
 import DetailPanel from "./components/DetailPanel";
 import RoadsPriorityPanel from "./components/RoadsPriorityPanel";
 import CamerasPriorityPanel from "./components/CamerasPriorityPanel";
-import InsightsPanel from "./components/InsightsPanel";
+import InsightsPanel from "./components/InsightsPanelRu";
 import ActionPlannerPanel from "./components/ActionPlannerPanel";
 import {
   checkHealth,
@@ -30,6 +30,14 @@ function ToggleButton({ active, children, onClick }) {
 function getVisibleDistricts(cityOverview) {
   if (!cityOverview?.districts) return [];
   return [...cityOverview.districts].sort((a, b) => a.name.localeCompare(b.name, "ru"));
+}
+
+function normalizeDistrictName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/district/g, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
 }
 
 function getActiveAlertCount(roads) {
@@ -58,7 +66,7 @@ export default function App() {
   const [districtFilter, setDistrictFilter] = useState("all");
   const [entityMode, setEntityMode] = useState("both");
   const [sidebarWidth, setSidebarWidth] = useState(224);
-  const [detailWidth, setDetailWidth] = useState(440);
+  const [detailWidth, setDetailWidth] = useState(520);
   const [cameraPanelWidth, setCameraPanelWidth] = useState(320);
   const [bottomHeight, setBottomHeight] = useState(256);
   const [activeResize, setActiveResize] = useState(null);
@@ -89,7 +97,7 @@ export default function App() {
       }
 
       if (activeResize === "detail" && appRect) {
-        setDetailWidth(clamp(appRect.right - event.clientX, 380, 640));
+        setDetailWidth(clamp(appRect.right - event.clientX, 460, 760));
       }
 
       if (activeResize === "camera" && mainRect) {
@@ -183,12 +191,14 @@ export default function App() {
 
   const filteredRoads = useMemo(() => {
     if (districtFilter === "all") return roads;
-    return roads.filter((road) => road.district === districtFilter);
+    const targetDistrict = normalizeDistrictName(districtFilter);
+    return roads.filter((road) => normalizeDistrictName(road.district) === targetDistrict);
   }, [districtFilter, roads]);
 
   const filteredCameras = useMemo(() => {
     if (districtFilter === "all") return cameras;
-    return cameras.filter((camera) => camera.district === districtFilter);
+    const targetDistrict = normalizeDistrictName(districtFilter);
+    return cameras.filter((camera) => normalizeDistrictName(camera.district) === targetDistrict);
   }, [districtFilter, cameras]);
 
   const visibleRoads = entityMode === "cameras" ? [] : filteredRoads;
@@ -439,7 +449,7 @@ export default function App() {
             </div>
           )}
 
-          <div className="flex-1 overflow-hidden">
+          <div className="min-w-0 flex-1 overflow-hidden">
             <InsightsPanel
               brain2={analysisResult?.brain2}
               roads={visibleRoads}
